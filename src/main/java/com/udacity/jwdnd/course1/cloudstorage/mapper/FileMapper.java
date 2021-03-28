@@ -8,8 +8,8 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
-    @Select("SELECT * FROM FILES")
-    List<File> getAllFiles();
+    @Select("SELECT * FROM FILES WHERE userId = #{userId}")
+    List<File> getAllFiles(int userId);
 
     @Select("SELECT fileId, filename, contenttype, filesize, userid, filedata FROM FILES " +
             "WHERE fileid = #{fileId}")
