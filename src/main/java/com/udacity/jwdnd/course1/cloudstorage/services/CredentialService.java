@@ -1,22 +1,40 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
+import com.udacity.jwdnd.course1.cloudstorage.DTO.CredentialDTO;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.CredentialMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
+import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.EncryptedPrivateKeyInfo;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 
 @Service
 public class CredentialService {
 
     private final CredentialMapper credentialMapper;
+    private final EncryptionService encryptionService;
+    private final UserService userService;
 
-    public CredentialService(CredentialMapper credentialMapper) {
+    public CredentialService(CredentialMapper credentialMapper, EncryptionService encryptionService, UserService userService) {
         this.credentialMapper = credentialMapper;
+        this.encryptionService = encryptionService;
+        this.userService = userService;
     }
 
-    public int insertCredential(Credential credential) {
-        return credentialMapper.insertCredential(credential);
+    public int insertCredential(CredentialDTO credentialDTO, Authentication auth) {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] key = new byte[16];
+        secureRandom.nextBytes(key);
+        String encodedKey = Base64.getEncoder().encodeToString(key);
+        String encryptedPassword = encryptionService.encryptValue(credentialDTO.getPassword(), encodedKey);
+        //Add in new Credential
+        User user = userService.getUserByUsername(auth.getName());
+        int userId = user.getUserId();
+        return credentialMapper.insertCredential(new Credential(null, credentialDTO.getUrl(), credentialDTO.getUsername(), encodedKey, encryptedPassword, userId));
     }
 
     public List<Credential> getAllCredentials(int userId) {
@@ -27,11 +45,16 @@ public class CredentialService {
         return credentialMapper.getCredentialById(id);
     }
 
-    public void updateCredential(Credential credential) {
+    public void updateCredential(CredentialDTO credentialDTO) {
+        Credential credential = credentialMapper.getCredentialById(credentialDTO.getCredentialId());
+        String encryptedPassword = encryptionService.encryptValue(credentialDTO.getPassword(), credential.getKey());
+        credential.setUsername(credentialDTO.getUsername());
+        credential.setPassword(encryptedPassword);
+        credential.setUrl(credentialDTO.getUrl());
         credentialMapper.updateCredential(credential);
     }
 
-    public void deleteCredential(int credentialId) {
-        credentialMapper.deleteCredential(credentialId);
+    public int deleteCredential(Integer credentialId) {
+        return credentialMapper.deleteCredential(credentialId);
     }
 }

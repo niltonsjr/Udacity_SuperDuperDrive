@@ -21,7 +21,6 @@ public class AuthenticationService implements AuthenticationProvider {
         this.hashService = hashService;
     }
 
-
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();

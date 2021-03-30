@@ -24,5 +24,5 @@ public interface CredentialMapper {
     void updateCredential(Credential credential);
 
     @Delete("DELETE FROM CREDENTIALS WHERE credentialid = {credentialId}")
-    void deleteCredential(int credentialId);
+    int deleteCredential(int credentialId);
 }
