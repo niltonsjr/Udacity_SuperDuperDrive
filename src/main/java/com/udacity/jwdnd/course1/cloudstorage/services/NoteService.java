@@ -1,7 +1,10 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
+import com.udacity.jwdnd.course1.cloudstorage.DTO.NoteDTO;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
+import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,13 +13,17 @@ import java.util.List;
 public class NoteService {
 
     private final NoteMapper noteMapper;
+    private final UserService userService;
 
-    public NoteService(NoteMapper noteMapper) {
+    public NoteService(NoteMapper noteMapper, UserService userService) {
         this.noteMapper = noteMapper;
+        this.userService = userService;
     }
 
-    public int insertNote(Note note) {
-        return noteMapper.insertNote(note);
+    public int insertNote(NoteDTO noteDTO, Authentication auth) {
+        User user = userService.getUserByUsername(auth.getName());
+        int userId = user.getUserId();
+        return noteMapper.insertNote(new Note(null, noteDTO.getNoteTitle(), noteDTO.getNoteDescription(), userId));
     }
 
     public List<Note> getAllNotes(int userId) {
@@ -27,11 +34,15 @@ public class NoteService {
         return noteMapper.getNoteById(noteId);
     }
 
-    public void updateNote(Note note) {
-            noteMapper.updateNote(note);
+    public int updateNote(NoteDTO noteDTO) {
+        Note note = noteMapper.getNoteById(noteDTO.getNoteId());
+        note.setNoteTitle(noteDTO.getNoteTitle());
+        note.setNoteDescription(note.getNoteDescription());
+        return noteMapper.updateNote(note);
+
     }
 
-    public void deleteNote(int id) {
-            noteMapper.deleteNote(id);
+    public int deleteNote(Integer noteId) {
+        return noteMapper.deleteNote(noteId);
     }
 }

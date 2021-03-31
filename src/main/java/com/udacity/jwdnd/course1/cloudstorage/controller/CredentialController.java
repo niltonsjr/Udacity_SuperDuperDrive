@@ -1,24 +1,18 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.DTO.CredentialDTO;
-import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
-import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.model.ResultMessage;
+import com.udacity.jwdnd.course1.cloudstorage.model.enums.ResultMessageType;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.List;
-
 @Controller
-@RequestMapping("home/credential")
+@RequestMapping("home/credentials")
 public class CredentialController {
 
     private final EncryptionService encryptionService;
@@ -31,50 +25,54 @@ public class CredentialController {
         this.userService = userService;
     }
 
+    /*
     @ModelAttribute
     public CredentialDTO getCredentialDTO() {
         return new CredentialDTO();
-    }
+    }*/
 
+  /*
     @GetMapping
-    public String getCredentialList(@ModelAttribute("credentialDTO") CredentialDTO credential, Model model, Authentication auth) {
+    public String getCredentialList(@ModelAttribute("credentialDTO") CredentialDTO credentialDTO, Model model, Authentication auth) {
         String username = auth.getName();
         User user = userService.getUserByUsername(username);
         int userId = user.getUserId();
 
         model.addAttribute("credential.username", username);
-        model.addAttribute("credential.password", credential.getPassword());
+        model.addAttribute("credential.password", credentialDTO.getPassword());
 
         return "/home";
-    }
+    }*/
 
     @PostMapping(value = "/add")
-    public String addCredential(@ModelAttribute("credentialDTO") CredentialDTO credential, Model model, Authentication auth) {
-        String message;
-        if (credential.getCredentialId() == null) {
-            credentialService.insertCredential(credential, auth);
-            model.addAttribute("updateSuccess", true);
+    public String addCredential(@ModelAttribute("credentialDTO") CredentialDTO credentialDTO, Model model, Authentication auth) {
+        ResultMessage message = new ResultMessage();
+        if (credentialDTO.getCredentialId() == null) {
+            credentialService.insertCredential(credentialDTO, auth);
+            message.setMessageType(ResultMessageType.SUCCESS);
+            message.setMessage("Credential added successfully.");
         } else {
-            credentialService.updateCredential(credential);
-            message = "Credential updated successfully";
-            model.addAttribute("updateSuccess", message);
+            credentialService.updateCredential(credentialDTO);
+            message.setMessageType(ResultMessageType.SUCCESS);
+            message.setMessage("Credential updated successfully.");
         }
+        model.addAttribute("resultMessage", message);
         return "/result";
     }
 
-    @GetMapping(value ="/delete/{credentialId}")
-    public String deleteCredential(@PathVariable int credentialId, Model model) {
+    @GetMapping(value = "/delete/{credentialId}")
+    public String deleteCredential(@PathVariable("credentialId") int credentialId, Model model) {
         int deleted = credentialService.deleteCredential(credentialId);
-        String message = null;
+        ResultMessage message = new ResultMessage();
         if (deleted < 1) {
-            message = "There was an error deleting de credential";
-        }
-        if (message == null) {
-            model.addAttribute("updateSuccess", true);
+            message.setMessageType(ResultMessageType.ERROR);
+            message.setMessage("There was an error deleting de credential.");
         }
         else {
-            model.addAttribute("updateFailed", message);
+            message.setMessageType(ResultMessageType.SUCCESS);
+            message.setMessage("The credential was deleted successfully.");
         }
+        model.addAttribute("resultMessage", message);
         return "/result";
 
     }

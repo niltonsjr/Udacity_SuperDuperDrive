@@ -34,6 +34,7 @@ public class HomeController {
     public String viewHome(Model model, Authentication auth) throws Exception {
         User user = this.userService.getUserByUsername(auth.getName());
         model.addAttribute("credentials", credentialService.getAllCredentials(user.getUserId()));
+        model.addAttribute("notes", noteService.getAllNotes(user.getUserId()));
         model.addAttribute("encryptionService",encryptionService);
         return "home";
     }
