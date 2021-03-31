@@ -37,12 +37,12 @@ public class CredentialService {
         return credentialMapper.insertCredential(new Credential(null, credentialDTO.getUrl(), credentialDTO.getUsername(), encodedKey, encryptedPassword, userId));
     }
 
-    public List<Credential> getAllCredentials(int userId) {
+    public List<Credential> getAllCredentials(Integer userId) {
         return credentialMapper.getAllCredentials(userId);
     }
 
-    public Credential getCredentialById(int id) {
-        return credentialMapper.getCredentialById(id);
+    public Credential getCredentialById(Integer credentialId) {
+        return credentialMapper.getCredentialById(credentialId);
     }
 
     public void updateCredential(CredentialDTO credentialDTO) {

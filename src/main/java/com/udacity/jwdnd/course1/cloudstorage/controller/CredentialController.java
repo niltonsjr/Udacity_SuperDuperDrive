@@ -18,7 +18,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Controller
-@RequestMapping("/credential")
+@RequestMapping("home/credential")
 public class CredentialController {
 
     private final EncryptionService encryptionService;
@@ -60,21 +60,24 @@ public class CredentialController {
             model.addAttribute("updateSuccess", message);
         }
         return "/result";
+    }
+
+    @GetMapping(value ="/delete/{credentialId}")
+    public String deleteCredential(@PathVariable int credentialId, Model model) {
+        int deleted = credentialService.deleteCredential(credentialId);
+        String message = null;
+        if (deleted < 1) {
+            message = "There was an error deleting de credential";
+        }
+        if (message == null) {
+            model.addAttribute("updateSuccess", true);
+        }
+        else {
+            model.addAttribute("updateFailed", message);
+        }
+        return "/result";
 
     }
 
-    // DECRYPT password by to show decrypted password when open up modal on frontend:
-    // does NOT return thymeleaf template because we return decrypted password as HTTP response value:
-    @GetMapping("/home/credential/decrypt-password/{credentialId}")
-    public ResponseEntity<String> decryptPassword(@PathVariable("credentialId") int credentialId) throws IOException {
-        Credential credential = this.credentialService.getCredentialById(credentialId);
-        // use .decryptValue in EncryptionService to decrypt password:
-        String decryptedPassword = this.encryptionService.decryptValue(credential.getPassword(), credential.getKey());
-        System.out.println("Decrypted password " + decryptedPassword);
-
-        // Reference: https://www.baeldung.com/spring-response-entity
-        // return the decrypted password back as HTTP response:
-        return ResponseEntity.ok(decryptedPassword);
-    }
 
 }
