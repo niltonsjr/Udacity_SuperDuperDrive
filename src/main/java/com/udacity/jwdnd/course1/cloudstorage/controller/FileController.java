@@ -1,17 +1,19 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.DTO.FileDTO;
+import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.ResultMessage;
 import com.udacity.jwdnd.course1.cloudstorage.model.enums.ResultMessageType;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -27,19 +29,14 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @ModelAttribute("fileDTO")
-    public FileDTO getFileDTO() {
-        return new FileDTO();
-    }
-
     @PostMapping(value = "/add")
     public String uploadFile(@ModelAttribute("file") FileDTO fileDTO, Model model, Authentication auth) throws IOException {
         ResultMessage message = new ResultMessage();
 
-        if (fileDTO.getFile().isEmpty()){
+        if (fileDTO.getFile().isEmpty()) {
             message.setMessageType(ResultMessageType.ERROR);
-            message.setMessage("File should not be empty.");
-            model.addAttribute("updateFailed", message);
+            message.setMessage("File should not be empty. Please select a file.");
+            model.addAttribute("resultMessage", message);
             return "/result";
         }
 
@@ -50,12 +47,37 @@ public class FileController {
                 message.setMessage("There was an error uploading the file.");
             }
             message.setMessageType(ResultMessageType.SUCCESS);
-            message.setMessage("The file was uploaded successfully");
+            message.setMessage("The file was uploaded successfully.");
         } else {
             message.setMessageType(ResultMessageType.ERROR);
             message.setMessage("There is an existing file with the same name. Please change the file name.");
         }
         model.addAttribute("resultMessage", message);
         return "/result";
+    }
+
+    @GetMapping(value = "/delete/{fileId}")
+    public String deleteFile(@PathVariable("fileId") int fileId, Model model) {
+        int result = fileService.deleteFile(fileId);
+        ResultMessage message = new ResultMessage();
+        if (result < 1) {
+            message.setMessageType(ResultMessageType.ERROR);
+            message.setMessage("There was an error deleting the file.");
+        } else {
+            message.setMessageType(ResultMessageType.SUCCESS);
+            message.setMessage("The file was deleted successfully.");
+        }
+        model.addAttribute("resultMessage", message);
+        return "/result";
+    }
+
+    @GetMapping("/view/{fileId}")
+    public ResponseEntity<ByteArrayResource> viewFile(@PathVariable("fileId") int fileId, Model model) {
+        File file = fileService.getFileById(fileId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline: filename=\"" + file.getFileName() + "\"")
+                .body(new ByteArrayResource(file.getFileData()));
     }
 }
