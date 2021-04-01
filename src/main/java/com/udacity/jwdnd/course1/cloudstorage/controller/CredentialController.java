@@ -25,25 +25,6 @@ public class CredentialController {
         this.userService = userService;
     }
 
-    /*
-    @ModelAttribute
-    public CredentialDTO getCredentialDTO() {
-        return new CredentialDTO();
-    }*/
-
-  /*
-    @GetMapping
-    public String getCredentialList(@ModelAttribute("credentialDTO") CredentialDTO credentialDTO, Model model, Authentication auth) {
-        String username = auth.getName();
-        User user = userService.getUserByUsername(username);
-        int userId = user.getUserId();
-
-        model.addAttribute("credential.username", username);
-        model.addAttribute("credential.password", credentialDTO.getPassword());
-
-        return "/home";
-    }*/
-
     @PostMapping(value = "/add")
     public String addCredential(@ModelAttribute("credentialDTO") CredentialDTO credentialDTO, Model model, Authentication auth) {
         ResultMessage message = new ResultMessage();
@@ -67,15 +48,11 @@ public class CredentialController {
         if (deleted < 1) {
             message.setMessageType(ResultMessageType.ERROR);
             message.setMessage("There was an error deleting de credential.");
-        }
-        else {
+        } else {
             message.setMessageType(ResultMessageType.SUCCESS);
             message.setMessage("The credential was deleted successfully.");
         }
         model.addAttribute("resultMessage", message);
         return "/result";
-
     }
-
-
 }

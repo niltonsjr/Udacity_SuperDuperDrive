@@ -2,12 +2,9 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.DTO.NoteDTO;
 import com.udacity.jwdnd.course1.cloudstorage.model.ResultMessage;
-import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.model.enums.ResultMessageType;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
-import org.apache.tomcat.util.http.parser.Authorization;
-import org.springframework.boot.Banner;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,16 +21,6 @@ public class NoteController {
         this.noteService = noteService;
         this.userService = userService;
     }
-
-    /*
-    @GetMapping
-    public String getNotesList(@ModelAttribute("noteDTO")NoteDTO noteDTO, Model model, Authentication auth) {
-        String username = auth.getName();
-        User user = userService.getUserByUsername(username);
-        int userId
-
-        return "/home";
-    }*/
 
     @PostMapping("/add")
     public String addNote(@ModelAttribute("noteDTO") NoteDTO noteDTO, Model model, Authentication auth) {
@@ -68,8 +55,7 @@ public class NoteController {
         if (deleted < 1) {
             message.setMessageType(ResultMessageType.ERROR);
             message.setMessage("There was an error deleting de note.");
-        }
-        else {
+        } else {
             message.setMessageType(ResultMessageType.SUCCESS);
             message.setMessage("The note was deleted successfully.");
         }

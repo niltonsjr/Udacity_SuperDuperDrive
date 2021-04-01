@@ -22,8 +22,7 @@ public class NoteService {
 
     public int insertNote(NoteDTO noteDTO, Authentication auth) {
         User user = userService.getUserByUsername(auth.getName());
-        int userId = user.getUserId();
-        return noteMapper.insertNote(new Note(null, noteDTO.getNoteTitle(), noteDTO.getNoteDescription(), userId));
+        return noteMapper.insertNote(new Note(null, noteDTO.getNoteTitle(), noteDTO.getNoteDescription(), user.getUserId()));
     }
 
     public List<Note> getAllNotes(int userId) {
