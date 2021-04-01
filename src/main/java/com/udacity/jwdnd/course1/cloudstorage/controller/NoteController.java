@@ -11,10 +11,7 @@ import org.springframework.boot.Banner;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = "home/notes")
@@ -48,7 +45,7 @@ public class NoteController {
                 message.setMessage("There was an error inserting the note.");
             } else {
                 message.setMessageType(ResultMessageType.SUCCESS);
-                message.setMessage("Note added successfully");
+                message.setMessage("Note added successfully.");
             }
         } else {
             int result = noteService.updateNote(noteDTO);
@@ -57,8 +54,24 @@ public class NoteController {
                 message.setMessage("There was an error updating the note.");
             } else {
                 message.setMessageType(ResultMessageType.SUCCESS);
-                message.setMessage("Note updated successfully");
+                message.setMessage("Note updated successfully.");
             }
+        }
+        model.addAttribute("resultMessage", message);
+        return "/result";
+    }
+
+    @GetMapping("/delete/{noteId}")
+    public String deleteNote(@PathVariable("noteId") int noteId, Model model) {
+        ResultMessage message = new ResultMessage();
+        int deleted = noteService.deleteNote(noteId);
+        if (deleted < 1) {
+            message.setMessageType(ResultMessageType.ERROR);
+            message.setMessage("There was an error deleting de note.");
+        }
+        else {
+            message.setMessageType(ResultMessageType.SUCCESS);
+            message.setMessage("The note was deleted successfully.");
         }
         model.addAttribute("resultMessage", message);
         return "/result";

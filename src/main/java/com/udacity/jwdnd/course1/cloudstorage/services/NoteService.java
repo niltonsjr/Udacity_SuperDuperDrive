@@ -37,7 +37,7 @@ public class NoteService {
     public int updateNote(NoteDTO noteDTO) {
         Note note = noteMapper.getNoteById(noteDTO.getNoteId());
         note.setNoteTitle(noteDTO.getNoteTitle());
-        note.setNoteDescription(note.getNoteDescription());
+        note.setNoteDescription(noteDTO.getNoteDescription());
         return noteMapper.updateNote(note);
 
     }
