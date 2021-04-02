@@ -28,13 +28,8 @@ public class HomeController {
         this.fileService = fileService;
     }
 
-    @ModelAttribute("fileDTO")
-    public FileDTO getFileDTO() {
-        return new FileDTO();
-    }
-
     @GetMapping()
-    public String viewHome(Model model, Authentication auth) throws Exception {
+    public String viewHome(@ModelAttribute("fileDTO") FileDTO fileDTO, Model model, Authentication auth) throws Exception {
         User user = this.userService.getUserByUsername(auth.getName());
         int userId = user.getUserId();
         model.addAttribute("credentials", credentialService.getAllCredentials(userId));

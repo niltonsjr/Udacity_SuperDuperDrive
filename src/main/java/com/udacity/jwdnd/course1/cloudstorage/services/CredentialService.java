@@ -44,13 +44,13 @@ public class CredentialService {
         return credentialMapper.getCredentialById(credentialId);
     }
 
-    public void updateCredential(CredentialDTO credentialDTO) {
+    public int updateCredential(CredentialDTO credentialDTO) {
         Credential credential = credentialMapper.getCredentialById(credentialDTO.getCredentialId());
         String encryptedPassword = encryptionService.encryptValue(credentialDTO.getPassword(), credential.getKey());
         credential.setUsername(credentialDTO.getUsername());
         credential.setPassword(encryptedPassword);
         credential.setUrl(credentialDTO.getUrl());
-        credentialMapper.updateCredential(credential);
+        return credentialMapper.updateCredential(credential);
     }
 
     public int deleteCredential(Integer credentialId) {

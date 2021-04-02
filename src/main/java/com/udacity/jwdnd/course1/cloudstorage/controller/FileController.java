@@ -6,6 +6,7 @@ import com.udacity.jwdnd.course1.cloudstorage.model.ResultMessage;
 import com.udacity.jwdnd.course1.cloudstorage.model.enums.ResultMessageType;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import com.udacity.jwdnd.course1.cloudstorage.services.UtilService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,10 +24,12 @@ public class FileController {
 
     private final UserService userService;
     private final FileService fileService;
+    private final UtilService utilService;
 
-    public FileController(UserService userService, FileService fileService) {
+    public FileController(UserService userService, FileService fileService, UtilService utilService) {
         this.userService = userService;
         this.fileService = fileService;
+        this.utilService = utilService;
     }
 
     @PostMapping(value = "/add")
@@ -45,9 +48,10 @@ public class FileController {
             if (result < 1) {
                 message.setMessageType(ResultMessageType.ERROR);
                 message.setMessage("There was an error uploading the file.");
+            } else {
+                message.setMessageType(ResultMessageType.SUCCESS);
+                message.setMessage("The file was uploaded successfully.");
             }
-            message.setMessageType(ResultMessageType.SUCCESS);
-            message.setMessage("The file was uploaded successfully.");
         } else {
             message.setMessageType(ResultMessageType.ERROR);
             message.setMessage("There is an existing file with the same name. Please change the file name.");
@@ -57,16 +61,25 @@ public class FileController {
     }
 
     @GetMapping(value = "/delete/{fileId}")
-    public String deleteFile(@PathVariable("fileId") int fileId, Model model) {
-        int result = fileService.deleteFile(fileId);
+    public String deleteFile(@PathVariable("fileId") int fileId, Model model, Authentication auth) {
         ResultMessage message = new ResultMessage();
-        if (result < 1) {
-            message.setMessageType(ResultMessageType.ERROR);
-            message.setMessage("There was an error deleting the file.");
+
+        File file = fileService.getFileById(fileId);
+
+        if (utilService.checkSameUser(file.getUserId(), auth)) {
+            int result = fileService.deleteFile(fileId);
+            if (result < 1) {
+                message.setMessageType(ResultMessageType.ERROR);
+                message.setMessage("There was an error deleting the file.");
+            } else {
+                message.setMessageType(ResultMessageType.SUCCESS);
+                message.setMessage("The file was deleted successfully.");
+            }
         } else {
-            message.setMessageType(ResultMessageType.SUCCESS);
-            message.setMessage("The file was deleted successfully.");
+            message.setMessageType(ResultMessageType.ERROR);
+            message.setMessage("You can't delete another user's file.");
         }
+
         model.addAttribute("resultMessage", message);
         return "/result";
     }
