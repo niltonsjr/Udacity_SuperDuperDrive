@@ -13,12 +13,12 @@
     <th:block th:switch="${resultMessage.messageType.name()}">
         <div th:case="'SUCCESS'" class="alert alert-success fill-parent" id="success-message">
             <h1 class="display-5">Success</h1>
-            <span th:text="${resultMessage.message}">Your changes were successfully saved.</span>
+            <span id="success-span-msg" th:text="${resultMessage.message}">Your changes were successfully saved.</span>
             <span>Click <a id="success-redirect" th:href="@{/home}">here</a> to continue.</span>
         </div>
         <div th:case="'ERROR'" class="alert alert-danger fill-parent" id="fail-message">
             <h1 class="display-5">Error</h1>
-            <span th:text="${resultMessage.message}">Your changes were not saved.</span>
+            <span id="fail-span-msg" th:text="${resultMessage.message}">Your changes were not saved.</span>
             <span> Click <a id="fail-redirect" th:href="@{/home}">here</a> to continue.</span>
         </div>
     </th:block>
