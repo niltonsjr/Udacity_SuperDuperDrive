@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.io.IOException;
 
@@ -41,6 +42,10 @@ public class FileController {
             message.setMessage("File should not be empty. Please select a file.");
             model.addAttribute("resultMessage", message);
             return "/result";
+        }
+
+        if (fileDTO.getFile().getSize() > 5000000) {
+            throw new MaxUploadSizeExceededException(fileDTO.getFile().getSize());
         }
 
         if (fileService.isFilenameAvailable(fileDTO.getFile().getOriginalFilename())) {
